@@ -5,8 +5,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using Microsoft.Dnx.Runtime;
-using Microsoft.Dnx.Runtime.Infrastructure;
 using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.Server.Testing
@@ -66,11 +64,6 @@ namespace Microsoft.AspNet.Server.Testing
                     DeploymentParameters.ApplicationHostConfigTemplateContent.Replace("[ApplicationPhysicalPath]", DeploymentParameters.ApplicationPath));
             }
 
-            if (!DeploymentParameters.PublishApplicationBeforeDeployment)
-            {
-                CopyAspNetLoader();
-            }
-
             var webroot = DeploymentParameters.ApplicationPath;
             if (!webroot.EndsWith("wwwroot"))
             {
@@ -127,38 +120,6 @@ namespace Microsoft.AspNet.Server.Testing
 
             Logger.LogInformation("Started iisexpress. Process Id : {processId}", _hostProcess.Id);
             return hostExitTokenSource.Token;
-        }
-
-        private void CopyAspNetLoader()
-        {
-            var libraryManager = (ILibraryManager)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(ILibraryManager));
-            var interopLibrary = libraryManager.GetLibrary("Microsoft.AspNet.Loader.IIS.Interop");
-
-            if (interopLibrary == null)
-            {
-                throw new Exception(
-                    string.Format("Include Microsoft.AspNet.Server.IIS package in your project.json to deploy in {0}.",
-                        ServerType.IISExpress));
-            }
-
-            var aspNetLoaderSrcPath = Path.Combine(interopLibrary.Path, "tools", "AspNet.Loader.dll");
-            var aspNetLoaderDestPath = Path.Combine(DeploymentParameters.ApplicationPath, "wwwroot", "bin", "AspNet.Loader.dll");
-
-            // Create bin directory if it does not exist.
-            Directory.CreateDirectory(new DirectoryInfo(aspNetLoaderDestPath).Parent.FullName);
-
-            if (!File.Exists(aspNetLoaderDestPath))
-            {
-                try
-                {
-                    File.Copy(aspNetLoaderSrcPath, aspNetLoaderDestPath);
-                }
-                catch (IOException)
-                {
-                    // Ignore file already exists exception. Sometimes multiple tests might try 
-                    // doing the same and one of them wins.
-                }
-            }
         }
 
         private string GetIISExpressPath()

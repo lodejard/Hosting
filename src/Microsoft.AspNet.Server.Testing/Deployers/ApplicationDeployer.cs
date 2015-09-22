@@ -106,7 +106,6 @@ namespace Microsoft.AspNet.Server.Testing
 
             DeploymentParameters.ApplicationPath =
                 (DeploymentParameters.ServerType == ServerType.IISExpress ||
-                DeploymentParameters.ServerType == ServerType.IISNativeModule ||
                 DeploymentParameters.ServerType == ServerType.IIS) ?
                 Path.Combine(DeploymentParameters.PublishedApplicationRootPath, "wwwroot") :
                 Path.Combine(DeploymentParameters.PublishedApplicationRootPath, "approot", "src",
